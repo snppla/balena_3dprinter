@@ -1,0 +1,49 @@
+version: '2.4'
+
+services:
+  octoprint1:
+    image: octoprint/octoprint
+    restart: unless-stopped
+    ports:
+      - 80:80
+    devices:
+     - /dev/ttyClientA:/dev/ttyUSB0
+     - /dev/video0:/dev/video0
+    volumes:
+     - octoprint1:/octoprint
+    environment:
+     - ENABLE_MJPG_STREAMER=true
+
+  octoprint2:
+    image: octoprint/octoprint
+    restart: unless-stopped
+    ports:
+      - 81:80
+    devices:
+     - /dev/ttyClientB:/dev/ttyUSB0
+     #- /dev/video0:/dev/video0
+    volumes:
+     - octoprint2:/octoprint
+#    environment:
+#     - ENABLE_MJPG_STREAMER=true
+
+  config-editor:
+    image: linuxserver/code-server
+    ports:
+      - 8443:8443
+    depends_on:
+      - octoprint1
+      - octoprint2
+    restart: unless-stopped
+    environment:
+      - PUID=0
+      - GUID=0
+      - TZ=America/Chicago
+      - DEFAULT_WORKSPACE=/mnt
+      - PASSWORD=1Password
+    volumes:
+      - octoprint1:/mnt/octoprint1
+      - octoprint2:/mnt/octoprint2
+volumes:
+  octoprint1:
+  octoprint2:
